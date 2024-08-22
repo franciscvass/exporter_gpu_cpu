@@ -1,5 +1,8 @@
 # README
 
+## supported OS Versions
+- It was tested on Ubuntu 22.04 and Oracle Linux 8 with Nvidia drivers installed
+
 ## role dcgm-exporter
 
 - it installs Nvidia DCGM and DCGM Exporter on Oracle Linux and Ubuntu
