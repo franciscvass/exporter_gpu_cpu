@@ -1,0 +1,7 @@
+---
+# defaults file for node-exporter
+
+node_exporter_composer_dir: /home/opc/node_exporter_composer
+node_exporter_composer_dir_ubuntu: /home/ubuntu/node_exporter_composer
+node_exporter_image: prom/node-exporter
+node_exporter_version_img_tag: latest

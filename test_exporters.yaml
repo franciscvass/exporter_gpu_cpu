@@ -1,0 +1,32 @@
+---
+- name: Test exporters
+  hosts: localhost
+
+  tasks:
+    - name: Get IP's
+      set_fact:
+        exporter_targets: "{{ hostvars.keys() | list }}"
+  
+    - name: debug
+      debug:
+        msg: "{{ exporter_targets }}"
+
+    - name: "get gpu metrics on {{ item }}"
+      shell: "curl {{ item }}:9400/metrics"
+      loop: "{{ exporter_targets}}"
+      register: curl_results
+
+    - name: Display curl results GPU
+      debug:
+        msg: "Curl to {{ item.item }} {{ item.rc }}"
+      loop: "{{ curl_results.results }}"
+
+    - name: "get node metrics on {{ item }}"
+      shell: "curl {{ item }}:9100/metrics"
+      loop: "{{ exporter_targets}}"
+      register: curl_results_n
+
+    - name: Display curl results node exporter
+      debug:
+        msg: "Curl to {{ item.item }}"
+      loop: "{{ curl_results_n.results }}"

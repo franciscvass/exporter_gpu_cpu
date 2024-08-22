@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  node_exporter:
+    image: {{ node_exporter_image }}:{{ node_exporter_version_img_tag }}
+    container_name: node_exporter
+    ports:
+      - "9100:9100"

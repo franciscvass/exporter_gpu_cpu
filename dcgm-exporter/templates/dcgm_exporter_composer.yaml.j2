@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  dcgm-exporter:
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:{{ dcgm_exporter_version_img_tag }}
+    deploy:
+      restart_policy:
+        condition: always
+    environment:
+      - DCGM_EXPORTER_VERSION={{ dcgm_exporter_version }}
+    network_mode: host
+    cap_add:
+      - SYS_ADMIN
+    command: ["-r", "localhost:5555", "-f", "/etc/dcgm-exporter/dcp-metrics-included.csv"]
+    container_name: dcgm-exporter

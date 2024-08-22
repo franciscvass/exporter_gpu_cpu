@@ -1,0 +1,12 @@
+---
+# defaults file for dcgm-exporter
+
+dcgm_exporter_composer_dir: /home/opc/dcgm_exporter_composer
+dcgm_exporter_composer_dir_ubuntu: /home/ubuntu/dcgm_exporter_composer
+#dcgm_exporter_version_img_tag: 3.3.6-3.4.2-ubuntu22.04
+#dcgm_exporter_version: 3.3.6-3.4.2
+dcgm_exporter_version_img_tag: 3.3.7-3.5.0-ubuntu22.04
+dcgm_exporter_version: 3.3.7-3.5.0
+
+ignore_block_errors: false
+

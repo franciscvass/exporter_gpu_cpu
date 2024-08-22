@@ -1,0 +1,13 @@
+[Unit]
+Description=NVIDIA DCGM Exporter
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker run --gpus all --rm -p 9400:9400 nvcr.io/nvidia/k8s/dcgm-exporter:{{ dcgm_exporter_version_img_tag }}
+ExecStop=/usr/bin/docker stop %n
+ExecStopPost=/usr/bin/docker rm %n
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+# site.yml
+
+---
+- name: Configure exporters
+  hosts: nodes
+  become: yes
+
+  roles:
+    - role: dcgm-exporter
+      vars:
+        dcgm_exporter_composer_dir: "/home/opc/dcgm_exporter_composer"
+    - role: node-exporter

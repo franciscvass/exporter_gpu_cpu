@@ -1,0 +1,64 @@
+---
+- block:
+
+  - name: Create directory for node-exporter composer
+    become_user: opc
+    file:
+      path: "{{ node_exporter_composer_dir }}"
+      state: directory
+      mode: '0755'
+
+  - name: Template the node-exporter composer file
+    ansible.builtin.template:
+      src: node_exporter_composer.yaml.j2
+      dest: "{{ node_exporter_composer_dir }}/node_exporter_composer.yaml"
+      #mode: '0644'
+
+  - name: Template the systemd file for node-exporter docker composer
+    ansible.builtin.template:
+      src: docker_compose_node_exporter.service.j2
+      dest: /etc/systemd/system/docker_compose_node_exporter.service
+      #mode: '0644'
+
+  - name: Add Docker repository
+    yum_repository: 
+      name: docker-ce
+      description: Docker CE Stable - $basearch
+      baseurl: https://download.docker.com/linux/centos/{{ ansible_distribution_major_version }}/$basearch/stable
+      enabled: 1
+      gpgcheck: 1
+      gpgkey: https://download.docker.com/linux/centos/gpg
+
+  - name: Install Docker packages
+    dnf: 
+      name: "{{ item }}"  
+      state: present
+    loop:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+  - name: Start Docker service
+    ansible.builtin.service:
+      name: "docker"
+      enabled: true
+      state: started
+
+  - name: Add opc user to docker group
+    user:
+      name: opc
+      groups: docker
+      append: yes
+  
+  - name: Firewall - open port
+    firewalld:
+      state: enabled
+      port: "{{ item }}"
+    loop:
+      - 9100/tcp
+  
+  - name: Ensure the docker_compose_node_exporter.service is enabled and started
+    ansible.builtin.systemd:
+      name: docker_compose_node_exporter.service
+      state: started
+      enabled: yes

@@ -1,0 +1,26 @@
+---
+- block:
+
+  - name: Create directory for node-exporter composer
+    become_user: ubuntu
+    file:
+      path: "{{ node_exporter_composer_dir_ubuntu }}"
+      state: directory
+      mode: '0755'
+
+  - name: Template the node-exporter composer file
+    ansible.builtin.template:
+      src: node_exporter_composer.yaml.j2
+      dest: "{{ node_exporter_composer_dir_ubuntu }}/node_exporter_composer.yaml"
+
+
+  - name: Template the systemd file for node-exporter docker composer
+    ansible.builtin.template:
+      src: docker_compose_node_exporter_ubuntu.service.j2
+      dest: /etc/systemd/system/docker_compose_node_exporter.service
+    
+  - name: Ensure the docker_compose_node_exporter.service is enabled and started
+    ansible.builtin.systemd:
+      name: docker_compose_node_exporter.service
+      state: started
+      enabled: yes

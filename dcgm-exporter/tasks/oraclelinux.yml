@@ -1,0 +1,106 @@
+---
+- block:
+
+  #- name: Add nvidia dcgm repo
+  #  yum_repository: 
+  #    name: cuda-rhel8-x86_64
+  #    description: Nvidia dcgm-exporter
+  #    #to add a var for rhel8 here
+  #    baseurl: https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/
+
+  - name: Add nvidia dcgm repo
+    yum_repository: 
+      name: cuda-rhel8-x86_64
+      description: Nvidia dcgm-exporter
+      #to add a var for rhel8 here
+      baseurl: https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/
+      gpgkey: https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/D42D0685.pub
+
+  - name: Install datacenter-gpu-manager
+    dnf: 
+      name: datacenter-gpu-manager  
+      state: present
+
+  - name: Install nvidia container toolkit
+    dnf: 
+      name: nvidia-container-toolkit  
+      state: present
+
+  #- name: Install nvidia driver 
+  #  command: "dnf module install nvidia-driver:550"
+
+
+  - name: Enable and start service nvidia-dcgm
+    ansible.builtin.service:
+      name: nvidia-dcgm
+      enabled: yes
+      state: started
+  
+  - name: Create directory for dcgm-exporter composer
+    become_user: opc
+    file:
+      #path: /home/opc/dcgm-exporter-composer
+      path: "{{ dcgm_exporter_composer_dir }}"
+      state: directory
+      mode: '0755'
+
+  - name: Template the dcgm-exporter composer file
+    become_user: opc
+    ansible.builtin.template:
+      src: dcgm_exporter_composer.yaml.j2
+      dest: "{{ dcgm_exporter_composer_dir }}/dcgm_exporter_composer.yaml"
+      #mode: '0644'
+  
+  - name: Template the systemd file for dcgm-exporter docker composer
+    ansible.builtin.template:
+      src: docker_compose_dcgm.service.j2
+      dest: /etc/systemd/system/docker_compose_dcgm.service
+      #mode: '0644'
+
+  - name: Add Docker repository
+    yum_repository: 
+      name: docker-ce
+      description: Docker CE Stable - $basearch
+      baseurl: https://download.docker.com/linux/centos/{{ ansible_distribution_major_version }}/$basearch/stable
+      enabled: 1
+      gpgcheck: 1
+      gpgkey: https://download.docker.com/linux/centos/gpg
+
+  - name: Install Docker packages
+    dnf: 
+      name: "{{ item }}"  
+      state: present
+    loop:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+  - name: Start Docker service
+    ansible.builtin.service:
+      name: "docker"
+      enabled: true
+      state: started
+
+  - name: Add opc user to docker group
+    user:
+      name: opc
+      groups: docker
+      append: yes
+
+  - name: Firewall - open port "{{ item }}"
+    firewalld:
+      state: enabled
+      immediate: yes
+      permanent: true
+      port: "{{ item }}"
+    loop:
+      - 9400/tcp
+
+  
+  - name: Ensure the docker-compose-dcgm.service is enabled and started
+    ansible.builtin.systemd:
+      name: docker_compose_dcgm.service
+      state: started
+      enabled: yes
+
+  ignore_errors: "{{ ignore_block_errors }}"

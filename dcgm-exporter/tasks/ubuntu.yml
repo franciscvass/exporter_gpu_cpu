@@ -1,0 +1,135 @@
+---
+- block:
+
+  - name: Get Ubuntu distribution
+    set_fact:
+      concatenated_version: "ubuntu{{ ansible_distribution_version.replace('.', '') }}"
+    register: ubuntu_version_result
+  
+  - name: Check if the cuda keyring is installed
+    shell: "dpkg -l | grep -w cuda"
+    register: cuda_installed
+    ignore_errors: yes
+  
+  - name: Download CUDA keyring package
+    get_url:
+      url: "https://developer.download.nvidia.com/compute/cuda/repos/{{ ubuntu_version_result.ansible_facts.concatenated_version }}/x86_64/cuda-keyring_1.1-1_all.deb"
+      dest: "/tmp/cuda-keyring_1.1-1_all.deb"
+      mode: "0644"
+    when: cuda_installed.rc != 0
+
+  - name: Install CUDA keyring package
+    apt:
+      deb: "/tmp/cuda-keyring_1.1-1_all.deb"
+      state: present
+    when: cuda_installed.rc != 0
+
+  - name: Update repo
+    apt:
+      update_cache: true
+      
+  - name: Install dcgm packge
+    apt:
+      name: datacenter-gpu-manager
+      state: present
+
+  - name: Install nvidia driver packge
+    apt:
+      name: nvidia-driver-555
+      state: present
+
+  - name: Install nvidia container packge
+    apt:
+      name: nvidia-container-toolkit
+      state: present
+
+  - name: Enable and start service nvidia-dcgm
+    ansible.builtin.service:
+      name: nvidia-dcgm
+      enabled: yes
+      state: started
+  
+  - name: Add Docker GPG apt Key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add Docker Repository
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu focal stable
+      state: present
+
+  - name: Install docker packges
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+      
+  - name: add ubuntu user to docker group
+    user:
+      name: ubuntu
+      groups: docker
+      append: yes
+
+  - name: Enable service Docker
+    ansible.builtin.service:
+      name: "docker"
+      enabled: true
+
+  - name: Enable service containerd
+    ansible.builtin.service:
+      name: containerd
+      enabled: yes
+
+#dcgm-exporter does not works with docker composer on ubuntu
+#we are using docker run to start the container and create the service
+
+  #- name: Create directory for dcgm-exporter composer
+  #  become_user: ubuntu
+  #  file:
+  #    path: "{{ dcgm_exporter_composer_dir_ubuntu }}"
+  #    state: directory
+  #    mode: '0755'
+
+  #- name: Template the dcgm-exporter composer file
+  #  become_user: ubuntu
+  #  ansible.builtin.template:
+  #    src: dcgm_exporter_composer.yaml.j2
+  #    dest: "{{ dcgm_exporter_composer_dir_ubuntu }}/dcgm_exporter_composer.yaml"
+  #    #mode: '0644'
+  
+  #- name: Template the systemd file for dcgm-exporter docker composer
+  #  ansible.builtin.template:
+  #    src: docker_compose_dcgm_ubuntu.service.j2
+  #    dest: /etc/systemd/system/docker_compose_dcgm.service
+  #    #mode: '0644'
+
+  - name: Template the systemd file for dcgm-exporter docker composer
+    ansible.builtin.template:
+      src: docker_run_dcgm_ubuntu.service.j2
+      dest: /etc/systemd/system/dcgm_service.service
+
+  - name: Ensure the dcgm_service.service is enabled and started
+    ansible.builtin.systemd:
+      name: dcgm_service.service
+      state: started
+      enabled: yes
+
+#dcgm-exporter does not works with docker composer on ubuntu
+#we are using docker run to start the container and create the service
+
+  #- name: Ensure the docker-compose-dcgm.service is enabled and started
+  #  ansible.builtin.systemd:
+  #    name: docker_compose_dcgm.service
+  #    state: started
+  #    enabled: yes
+
+  ignore_errors: "{{ ignore_block_errors }}"
+
+
+
+

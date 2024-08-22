@@ -1,0 +1,9 @@
+[Service]
+Restart=always
+WorkingDirectory={{ node_exporter_composer_dir_ubuntu }}
+ExecStart=/usr/bin/docker compose -f node_exporter_composer.yaml up
+ExecStop=/usr/bin/docker compose -f node_exporter_composer.yaml down
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target

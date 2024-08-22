@@ -1,0 +1,18 @@
+---
+# tasks file for dcgm-exporter
+- name: Linux task
+  debug:
+    msg: "Including tasks from oraclelinux.yml"
+  when: ansible_os_family == 'RedHat' and ansible_distribution == 'OracleLinux'
+
+
+- include_tasks: oraclelinux.yml
+  when: ansible_os_family == 'RedHat' and ansible_distribution == 'OracleLinux'
+
+- name: Ubuntu task
+  debug:
+    msg: "Including tasks from ubuntu.yml"
+  when: ansible_os_family == 'Debian'
+
+- include_tasks: ubuntu.yml
+  when: ansible_os_family == 'Debian'
