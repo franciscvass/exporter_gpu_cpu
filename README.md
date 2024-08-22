@@ -1,7 +1,7 @@
 # README
 
 ## supported OS Versions
-- It was tested on Ubuntu 22.04 and Oracle Linux 8 with Nvidia drivers installed
+- It was tested on Ubuntu 22.04 and Oracle Linux 8 with Nvidia drivers installed ([see here](https://docs.oracle.com/en-us/iaas/images/image/55a32890-2cfa-42d2-92d9-998a31eecfd0/))
 
 ## role dcgm-exporter
 
