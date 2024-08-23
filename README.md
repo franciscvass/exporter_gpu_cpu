@@ -6,14 +6,14 @@
 ## role dcgm-exporter
 
 - it installs Nvidia DCGM and DCGM Exporter on Oracle Linux and Ubuntu
-- it assume the Nvidia drivers ae installed on Oracle Linux. For Ubuntu it installs Nvidia drivers 
+- it assume the Nvidia drivers are installed on Oracle Linux. For Ubuntu it installs Nvidia drivers 
 - it uses Docker composer on Oracle Linux to manage the container that collects and exposes the metris
 - it uses Docker on Ubuntu to manage the container that collects and exposes the metris
-- the GPU metris are exposed on <Host IP>:9400/metrics
+- the GPU metris are exposed on Host_IP:9400/metrics
 
 ## role node-exporter
 
-- it uses Docker Composer to run a container that collects abd exposes metrics on <Host IP>:9100/metrics
+- it uses Docker Composer to run a container that collects abd exposes metrics on Host_IP:9100/metrics
 
 ## How to run it
 
