@@ -25,7 +25,7 @@ The ansible scripts present in this repo are mines and provided "as is". They do
 - Use __inventory__ as an example for ansible inventory
 
 ```
-ansible-playbook -i inventory exporter.yaml --private-key <parh to ssh private key>
+ansible-playbook -i inventory exporter.yaml --private-key <path to ssh private key>
 ```
 
 ## to test if metrics are published
