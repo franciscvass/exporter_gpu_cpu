@@ -35,7 +35,7 @@
 
   - name: Install nvidia driver packge
     apt:
-      name: nvidia-driver-555
+      name: "{{ nvidia_driver_ubuntu }}"
       state: present
 
   - name: Install nvidia container packge
