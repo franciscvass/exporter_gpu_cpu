@@ -32,11 +32,17 @@
     apt:
       name: datacenter-gpu-manager
       state: present
+  
+  - name: Check if the nvidia-driver is installed
+    shell: "dpkg -l | grep  nvidia-driver-"
+    register: nvidia_driver_installed
+    ignore_errors: yes
 
   - name: Install nvidia driver packge
     apt:
       name: "{{ nvidia_driver_ubuntu }}"
       state: present
+    when: nvidia_driver_installed.rc != 0
 
   - name: Install nvidia container packge
     apt:
